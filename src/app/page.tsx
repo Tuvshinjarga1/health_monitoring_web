@@ -75,13 +75,23 @@ export default function HomePage() {
         </div>
 
         {/* Manual Button */}
-        <button
-          onClick={handleManualRedirect}
-          className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          Dashboard руу очих
-          <ArrowRight className="w-4 h-4 ml-2" />
-        </button>
+        <div className="flex gap-4 justify-center">
+          <button
+            onClick={handleManualRedirect}
+            className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Dashboard руу очих
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </button>
+
+          <button
+            onClick={() => router.push("/map")}
+            className="inline-flex items-center px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition-colors"
+          >
+            GPS Зураг харах
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </button>
+        </div>
 
         {/* Quick Info */}
         <div className="mt-8 text-sm text-gray-500">

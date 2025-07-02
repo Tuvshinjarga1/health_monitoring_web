@@ -1,8 +1,18 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Heart, Activity, Battery, User, Clock, Users } from "lucide-react";
+import {
+  Heart,
+  Activity,
+  Battery,
+  User,
+  Clock,
+  Users,
+  MapPin,
+  ArrowRight,
+} from "lucide-react";
 import { format } from "date-fns";
+import { useRouter } from "next/navigation";
 
 // Health дата interface
 interface HealthData {
@@ -15,6 +25,8 @@ interface HealthData {
   timeLabel?: string; // Цагны нэр (HH:MM:SS)
   dateLabel?: string; // Өдрийн нэр (YYYY-MM-DD)
   deviceName?: string; // Төхөөрөмжийн нэр
+  latitude?: number; // GPS координат - өргөрөг
+  longitude?: number; // GPS координат - уртраг
 }
 
 // useStream hook
@@ -87,10 +99,16 @@ function useStream(streamName: string) {
 }
 
 export default function HealthDashboard() {
+  const router = useRouter();
   const { data: healthData, isConnected, error } = useStream("health");
   const [sortBy, setSortBy] = useState<
     "userId" | "heartRate" | "timestamp" | "userName"
   >("timestamp");
+
+  // GPS координаттай хэрэглэгчдийн тоо
+  const usersWithGPS = healthData.filter(
+    (user) => user.latitude && user.longitude
+  ).length;
 
   // Дата эрэмбэлэх
   const sortedData = [...healthData].sort((a, b) => {
@@ -155,20 +173,33 @@ export default function HealthDashboard() {
               </p>
             </div>
 
-            {/* Connection Status */}
-            <div
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
-                isConnected
-                  ? "bg-green-100 text-green-800 border border-green-200"
-                  : "bg-red-100 text-red-800 border border-red-200"
-              }`}
-            >
+            {/* Right side controls */}
+            <div className="flex items-center gap-4">
+              {/* Map button */}
+              <button
+                onClick={() => router.push("/map")}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <MapPin className="w-4 h-4" />
+                GPS Зураг
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              {/* Connection Status */}
               <div
-                className={`w-2 h-2 rounded-full ${
-                  isConnected ? "bg-green-500" : "bg-red-500"
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
+                  isConnected
+                    ? "bg-green-100 text-green-800 border border-green-200"
+                    : "bg-red-100 text-red-800 border border-red-200"
                 }`}
-              ></div>
-              {isConnected ? "Stream Active" : "Disconnected"}
+              >
+                <div
+                  className={`w-2 h-2 rounded-full ${
+                    isConnected ? "bg-green-500" : "bg-red-500"
+                  }`}
+                ></div>
+                {isConnected ? "Stream Active" : "Disconnected"}
+              </div>
             </div>
           </div>
 
@@ -179,8 +210,12 @@ export default function HealthDashboard() {
               <span>{healthData.length} идэвхтэй хэрэглэгч</span>
             </div>
             <div className="flex items-center gap-2">
+              <MapPin className="w-4 h-4" />
+              <span>{usersWithGPS} GPS-тэй хэрэглэгч</span>
+            </div>
+            <div className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              <span>Хамгийн ихдээ 50 хэрэглэгч</span>
+              <span>Хамгийн ихдээр 50 хэрэглэгч</span>
             </div>
           </div>
         </div>
@@ -264,6 +299,12 @@ export default function HealthDashboard() {
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4" />
                         Цаг/Огноо
+                      </div>
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="w-4 h-4" />
+                        GPS Байршил
                       </div>
                     </th>
                   </tr>
@@ -375,6 +416,17 @@ export default function HealthDashboard() {
                         </div>
                         <div className="text-xs text-gray-500">
                           {user.dateLabel || formatDate(user.timestamp)}
+                        </div>
+                      </td>
+
+                      {/* GPS Coordinates */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm font-medium text-gray-900">
+                          {user.latitude && user.longitude
+                            ? `${user.latitude.toFixed(
+                                6
+                              )}, ${user.longitude.toFixed(6)}`
+                            : "N/A"}
                         </div>
                       </td>
                     </tr>

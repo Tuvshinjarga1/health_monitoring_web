@@ -11,6 +11,8 @@ interface HealthData {
   timeLabel?: string; // Цагны нэр (HH:MM:SS)
   dateLabel?: string; // Өдрийн нэр (YYYY-MM-DD)
   deviceName?: string; // Төхөөрөмжийн нэр
+  latitude?: number; // GPS координат - өргөрөг
+  longitude?: number; // GPS координат - уртраг
 }
 
 // Health дата хадгалах Map (максимум 50 хэрэглэгч)
@@ -76,6 +78,8 @@ export async function POST(request: NextRequest) {
       timeLabel,
       dateLabel,
       deviceName,
+      latitude,
+      longitude,
     } = body;
 
     // Validation
@@ -108,6 +112,8 @@ export async function POST(request: NextRequest) {
       timeLabel: timeLabel ? String(timeLabel) : undefined,
       dateLabel: dateLabel ? String(dateLabel) : undefined,
       deviceName: deviceName ? String(deviceName) : undefined,
+      latitude: latitude ? Number(latitude) : undefined,
+      longitude: longitude ? Number(longitude) : undefined,
     };
 
     // Дата хадгалах
@@ -121,6 +127,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const locationInfo =
+      healthData.latitude && healthData.longitude
+        ? ` GPS: [${healthData.latitude.toFixed(
+            4
+          )}, ${healthData.longitude.toFixed(4)}]`
+        : "";
+
     console.log(
       `📊 Health data хүлээн авлаа: ${
         healthData.userName || healthData.userId
@@ -128,7 +141,7 @@ export async function POST(request: NextRequest) {
         healthData.heartRate
       }, Steps: ${healthData.stepCount}, Battery: ${healthData.battery}% [${
         healthData.timeLabel || "No time"
-      }]`
+      }]${locationInfo}`
     );
 
     // Stream clients руу дата илгээх
